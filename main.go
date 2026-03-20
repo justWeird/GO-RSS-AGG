@@ -78,8 +78,11 @@ func main() {
 	// define a new route for creating a user
 	v1Router.Post("/users", appDB.handlerCreateUser) // using the handlerCreateUser method defined on the dbConfig struct to handle POST requests to /v1/users
 
-	// define a new route for getting a user by their API key
-	v1Router.Get("/users", appDB.handlerGetUserByAPIKey) // using the handlerGetUserByAPIKey method defined on the dbConfig struct to handle GET requests to /v1/users/apikey
+	// define a new route for getting a user by their API key. Refactor with middleware auth.
+	v1Router.Get("/users", appDB.authMiddleware((appDB.handlerGetUserByAPIKey))) // using the handlerGetUserByAPIKey method defined on the dbConfig struct to handle GET requests to /v1/users/apikey
+
+	// define a new route for creating a feed
+	v1Router.Post("/feeds", appDB.authMiddleware(appDB.handlerCreateFeed)) // using the handlerCreateFeed method defined on the dbConfig struct to handle POST requests to /v1/feeds, wrapped with the authMiddleware to require authentication
 
 	// set up the server
 	serverObj := &http.Server{
