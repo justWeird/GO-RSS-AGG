@@ -48,3 +48,13 @@ func dbFeedToFeed(dbFeed database.Feed) Feed {
 		UserID:    dbFeed.UserID,
 	}
 }
+
+func dbFeedsToFeeds(dbFeeds []database.Feed) []Feed {
+	feeds := []Feed{} //initialize an empty slice to hold the converted feeds
+
+	for _, dbFeed := range dbFeeds {
+		feeds = append(feeds, dbFeedToFeed(dbFeed)) // convert each database feed to our Feed struct and append it to the feeds slice
+	}
+
+	return feeds
+}

@@ -84,6 +84,8 @@ func main() {
 	// define a new route for creating a feed
 	v1Router.Post("/feeds", appDB.authMiddleware(appDB.handlerCreateFeed)) // using the handlerCreateFeed method defined on the dbConfig struct to handle POST requests to /v1/feeds, wrapped with the authMiddleware to require authentication
 
+	v1Router.Get("/feeds", appDB.handlerGetFeeds) // using the handlerGetFeeds method defined on the dbConfig struct to handle GET requests to /v1/feeds, which does not require authentication
+
 	// set up the server
 	serverObj := &http.Server{
 		Handler: router,     //server requires a handler to route requests

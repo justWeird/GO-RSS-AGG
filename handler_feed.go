@@ -51,3 +51,15 @@ func (db *dbConfig) handlerCreateFeed(w http.ResponseWriter, r *http.Request, us
 	// we pass the http.ResponseWriter, a status code of 200 (OK), and a simple payload containing a message
 	respondWithJSON(w, 201, dbFeedToFeed(feed)) //initialize an empty struct as the payload, which will be converted to an empty JSON object in the response
 }
+
+func (db *dbConfig) handlerGetFeeds(w http.ResponseWriter, r *http.Request) {
+	// call the GetFeeds method on the database connection to retrieve all feeds
+	feeds, err := db.DB.GetFeeds(r.Context())
+	if err != nil {
+		respondWithError(w, 400, fmt.Sprintf("Error fetching feeds: %v", err))
+		return
+	}
+
+	// convert the database feeds to our Feed struct and send a JSON response
+	respondWithJSON(w, 200, dbFeedsToFeeds(feeds))
+}
