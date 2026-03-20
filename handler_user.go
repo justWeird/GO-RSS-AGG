@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/justWeird/GO-RSS-AGG/internal/auth"
 	"github.com/justWeird/GO-RSS-AGG/internal/database"
 )
 
@@ -47,5 +48,27 @@ func (db *dbConfig) handlerCreateUser(w http.ResponseWriter, r *http.Request) {
 
 	// call the respondWithJSON function to send a JSON response back to the client
 	// we pass the http.ResponseWriter, a status code of 200 (OK), and a simple payload containing a message
-	respondWithJSON(w, 200, dbUserToUser(user)) //initialize an empty struct as the payload, which will be converted to an empty JSON object in the response
+	respondWithJSON(w, 201, dbUserToUser(user)) //initialize an empty struct as the payload, which will be converted to an empty JSON object in the response
+}
+
+// handler to get a single user's details based on their API key. It extracts the API key from the URL parameters, queries the database for the user associated with that API key, and returns the user's details in a JSON response.
+func (db *dbConfig) handlerGetUserByAPIKey(w http.ResponseWriter, r *http.Request) {
+	// Because this route needs the user to be authenticated, the user will have to pass in their API key as a URL parameter.
+	// We can extract this parameter using chi's URLParam function, which allows us to access the value of the "apikey" parameter from the URL.
+	// Abstract the logic for getting the API key into a separate package i.e getAPIKey
+	apiKey, err := auth.GetAPIKey(r.Header)
+
+	if err != nil {
+		respondWithError(w, 401, fmt.Sprintf("Auth Error: %v", err)) // using 401 (Unauthorized) to indicate that the error is due to authentication issues
+		return
+	}
+
+	user, err := db.DB.GetUserByAPIKey(r.Context(), apiKey)
+
+	if err != nil {
+		respondWithError(w, 404, fmt.Sprintf("User not found: %v", err))
+		return
+	}
+
+	respondWithJSON(w, 200, dbUserToUser(user))
 }

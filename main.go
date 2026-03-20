@@ -78,6 +78,9 @@ func main() {
 	// define a new route for creating a user
 	v1Router.Post("/users", appDB.handlerCreateUser) // using the handlerCreateUser method defined on the dbConfig struct to handle POST requests to /v1/users
 
+	// define a new route for getting a user by their API key
+	v1Router.Get("/users", appDB.handlerGetUserByAPIKey) // using the handlerGetUserByAPIKey method defined on the dbConfig struct to handle GET requests to /v1/users/apikey
+
 	// set up the server
 	serverObj := &http.Server{
 		Handler: router,     //server requires a handler to route requests
