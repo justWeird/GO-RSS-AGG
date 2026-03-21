@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
@@ -96,11 +97,18 @@ func main() {
 	// define a new route for unfollowing a feed
 	v1Router.Delete("/follow/{followed_id}", appDB.authMiddleware(appDB.handlerUnfollowFeed)) // using the handlerUnfollowFeed method defined on the dbConfig struct to handle DELETE requests to /v1/follow, wrapped with the authMiddleware to require authentication
 
+	// define a new route for getting all posts for a user based on the feeds they follow
+	v1Router.Get("/posts", appDB.authMiddleware(appDB.handlerGetUserPosts)) // using the handlerGetUserPosts method defined on the dbConfig struct to handle GET requests to /v1/posts, wrapped with the authMiddleware to require authentication
+
 	// set up the server
 	serverObj := &http.Server{
 		Handler: router,     //server requires a handler to route requests
 		Addr:    ":" + port, // specify the port to listen on
 	}
+
+	go startBackgroundScraper(appDB.DB, 10, time.Minute) // start the background scraper in a separate goroutine, allowing it to run concurrently with the HTTP server. This way, the scraper can continue to fetch and update feeds while the server is running and handling incoming requests
+
+	// below this, the server will block and wait. We need the scraper to have been called to work in another goroutine
 
 	fmt.Printf("Server will start on port: %s\n", port)
 

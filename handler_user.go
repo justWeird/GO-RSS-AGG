@@ -60,3 +60,18 @@ func (db *dbConfig) handlerGetUserByAPIKey(w http.ResponseWriter, r *http.Reques
 
 	respondWithJSON(w, 200, dbUserToUser(user))
 }
+
+// handler to get all posts for a user based on feeds they followed.
+func (db *dbConfig) handlerGetUserPosts(w http.ResponseWriter, r *http.Request, user database.User) {
+	posts, err := db.DB.GetPostsForUser(r.Context(), database.GetPostsForUserParams{
+		UserID: user.ID,
+		Limit:  10, // we can set a limit on the number of posts returned to prevent overwhelming the client with too much data. In this case, we're limiting it to 20 posts.
+	})
+
+	if err != nil {
+		respondWithError(w, 400, fmt.Sprintf("Error fetching posts: %v", err))
+		return
+	}
+
+	respondWithJSON(w, 200, dbPostsToPosts(posts))
+}
