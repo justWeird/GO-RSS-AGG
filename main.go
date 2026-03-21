@@ -84,7 +84,17 @@ func main() {
 	// define a new route for creating a feed
 	v1Router.Post("/feeds", appDB.authMiddleware(appDB.handlerCreateFeed)) // using the handlerCreateFeed method defined on the dbConfig struct to handle POST requests to /v1/feeds, wrapped with the authMiddleware to require authentication
 
-	v1Router.Get("/feeds", appDB.handlerGetFeeds) // using the handlerGetFeeds method defined on the dbConfig struct to handle GET requests to /v1/feeds, which does not require authentication
+	// using the handlerGetFeeds method defined on the dbConfig struct to handle GET requests to /v1/feeds, which does not require authentication
+	v1Router.Get("/feeds", appDB.handlerGetFeeds)
+
+	// define a new route for following a feed
+	v1Router.Post("/follow", appDB.authMiddleware(appDB.handlerFollowFeed)) // using the handlerFollowFeed method defined on the dbConfig struct to handle POST requests to /v1/follow, wrapped with the authMiddleware to require authentication
+
+	// define a new route for getting the feeds that a user is following
+	v1Router.Get("/follow", appDB.authMiddleware(appDB.handlerGetFollowedFeeds)) // using the handlerGetFollowedFeeds method defined on the dbConfig struct to handle GET requests to /v1/follow, wrapped with the authMiddleware to require authentication
+
+	// define a new route for unfollowing a feed
+	v1Router.Delete("/follow/{followed_id}", appDB.authMiddleware(appDB.handlerUnfollowFeed)) // using the handlerUnfollowFeed method defined on the dbConfig struct to handle DELETE requests to /v1/follow, wrapped with the authMiddleware to require authentication
 
 	// set up the server
 	serverObj := &http.Server{
